@@ -2,6 +2,8 @@ services:
     postgres:
         image: postgres
 
+        container_name: greenscale-postgres
+
         volumes:
             - postgres_data:/var/lib/postgresql/data
             - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -13,12 +15,28 @@ services:
             - POSTGRES_USER=${POSTGRES_USER}
             - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
             - POSTGRES_DB=${POSTGRES_DB}
+
     mqtt:
-        image: eclipse-mosquitto:latest
+        build:
+            context: ./docker/mosquitto
+
+        container_name: greenscale-mqtt
+
         volumes:
-            - ./docker/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+            - ./docker/mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+            - ./docker/mosquitto/certs:/mosquitto/client-certs
+
         ports:
+            - "8883:8883"
             - "1883:1883"
+
+        environment:
+            - MQTT_USERNAME=${MQTT_USERNAME}
+            - MQTT_PASSWORD=${MQTT_PASSWORD}
+
         restart: always
+
+        entrypoint: ["/bin/sh", "-c", "/mosquitto/config/start.sh"]
+
 volumes:
     postgres_data:
