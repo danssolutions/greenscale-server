@@ -1,4 +1,5 @@
-import json, threading
+import json
+import threading
 import paho.mqtt.client as mqtt
 import os
 from .db import get_session_local
@@ -7,16 +8,18 @@ from dotenv import load_dotenv
 
 load_dotenv('../.env')
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+BASE_DIR = os.path.dirname(os.path.dirname(
+    os.path.dirname(os.path.abspath(__file__))))
 
 BROKER = "127.0.0.1"
-PORT = 8883
-TOPIC = "fishwise/telemetry"
+PORT = 1883
+TOPIC = "greenscale/greenscale-edge/telemetry"
 
 USERNAME = os.getenv('MQTT_USERNAME')
 PASSWORD = os.getenv('MQTT_PASSWORD')
 
 CA_CERT = os.path.join(BASE_DIR, "docker", "mosquitto", "certs", "ca.crt")
+
 
 def on_connect(client, userdata, flags, rc):
     print(f"Connected to MQTT Broker with code {rc}")
@@ -25,6 +28,7 @@ def on_connect(client, userdata, flags, rc):
         print(f"Subscribed to topic: {TOPIC}")
     except:
         print(f"Error: {e}")
+
 
 def on_message(client, userdata, msg):
     print("got message")
@@ -41,6 +45,7 @@ def on_message(client, userdata, msg):
     except Exception as e:
         print(f"Error: {e}")
 
+
 def start_mqtt_listener():
     client = mqtt.Client()
 
@@ -50,7 +55,7 @@ def start_mqtt_listener():
     client.tls_set(ca_certs=CA_CERT)
     client.username_pw_set(USERNAME, PASSWORD)
 
-    client.tls_insecure_set(True) # bad
+    client.tls_insecure_set(True)  # bad
 
     try:
         client.connect(BROKER, PORT, 60)

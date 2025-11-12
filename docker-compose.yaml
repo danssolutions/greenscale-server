@@ -1,11 +1,11 @@
 services:
     postgres:
-        image: postgres
+        image: postgres:17
 
         container_name: greenscale-postgres
 
         volumes:
-            - postgres_data:/var/lib/postgresql/data
+            - postgres_data:/var/lib/postgresql
             - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
 
         ports:
