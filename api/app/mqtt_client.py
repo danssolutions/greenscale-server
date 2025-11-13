@@ -52,10 +52,10 @@ def start_mqtt_listener():
     client.on_connect = on_connect
     client.on_message = on_message
 
-    client.tls_set(ca_certs=CA_CERT)
+    # client.tls_set(ca_certs=CA_CERT)
     client.username_pw_set(USERNAME, PASSWORD)
 
-    client.tls_insecure_set(True)  # bad
+    # client.tls_insecure_set(True)  # bad
 
     try:
         client.connect(BROKER, PORT, 60)
