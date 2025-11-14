@@ -12,6 +12,21 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(255) UNIQUE NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS telemetry_data (
+    id SERIAL PRIMARY KEY,
+    version INTEGER NOT NULL,
+    device_id VARCHAR(255) NOT NULL,
+    timestamp TIMESTAMPTZ NOT NULL,
+    online BOOLEAN NOT NULL,
+    uptime_sec INTEGER NOT NULL,
+    temperature_c REAL NOT NULL,
+    ph REAL NOT NULL,
+    do_mg_per_l REAL NOT NULL,
+    turbidity_sensor_v REAL NOT NULL,
+    turbidity_index REAL NOT NULL,
+    avg_color_hex VARCHAR(7) NOT NULL
+);
+
 -- Seed data:
 
 INSERT INTO user_types (name)
