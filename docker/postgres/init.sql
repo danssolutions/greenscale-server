@@ -5,17 +5,38 @@ CREATE TABLE IF NOT EXISTS user_types (
     name VARCHAR(255) UNIQUE NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS farms (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255),
+    temperature_min  REAL,
+    temperature_max  REAL,
+    ph_min  REAL,
+    ph_max  REAL,
+    do_min  REAL,
+    do_max  REAL,
+    turbidity_min  REAL,
+    turbidity_max  REAL
+);
+
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     type_id INT REFERENCES user_types(id),
-    name VARCHAR(255) UNIQUE NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255),
+    farm_id INT REFERENCES farms(id)
+
+);
+
+CREATE TABLE IF NOT EXISTS devices (
+    id VARCHAR(255) PRIMARY KEY,
+    farm_id INT REFERENCES farms(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS telemetry_data (
     id SERIAL PRIMARY KEY,
     version INTEGER NOT NULL,
-    device_id VARCHAR(255) NOT NULL,
+    device_id VARCHAR(255) NOT NULL REFERENCES devices(id) ON DELETE CASCADE,
     timestamp TIMESTAMPTZ NOT NULL,
     online BOOLEAN NOT NULL,
     uptime_sec INTEGER NOT NULL,
@@ -33,6 +54,13 @@ INSERT INTO user_types (name)
 VALUES ('user')
 ON CONFLICT (name) DO NOTHING;
 
-INSERT INTO users (type_id, name, email)
-VALUES ((SELECT id FROM user_types WHERE name = 'user'), 'user', 'user@user.com')
+INSERT INTO farms (name, temperature_min, temperature_max, ph_min, ph_max, do_min, do_max, turbidity_min, turbidity_max)
+VALUES ('Farm1', 19, 25, 6, 8, 8, 9, 2, 5);
+
+INSERT INTO devices (id, farm_id)
+VALUES ('greenscale-edge', (SELECT id FROM farms WHERE name = 'Farm1'))
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO users (type_id, name, email, farm_id)
+VALUES ((SELECT id FROM user_types WHERE name = 'user'), 'user', 'user@user.com', (SELECT id FROM farms WHERE name = 'Farm1'))
 ON CONFLICT (email) DO NOTHING;

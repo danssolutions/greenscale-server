@@ -3,7 +3,7 @@ from datetime import datetime
 
 
 class UserType(SQLModel, table=True):
-    __tablename__="user_types"
+    __tablename__ = "user_types"
 
     id: int | None = Field(default=None, primary_key=True)
     name: str = Field(unique=True, index=True)
@@ -12,14 +12,42 @@ class UserType(SQLModel, table=True):
 
 
 class User(SQLModel, table=True):
-    __tablename__="users"
+    __tablename__ = "users"
 
     id: int | None = Field(default=None, primary_key=True)
     type_id: int | None = Field(default=None, foreign_key="user_types.id")
-    name: str = Field(unique=True, index=True)
-    email: str = Field(unique=True, index=True)
+    name: str
+    email: str
+    password_hash: str
+    farm_id: int | None = Field(default=None, foreign_key="farms.id")
 
     user_type: UserType | None = Relationship(back_populates="users")
+
+class UserInfo(SQLModel):
+    id: int
+    name: str
+    email: str
+    farm_id: int | None
+
+class Farm(SQLModel, table=True):
+    __tablename__ = "farms"
+
+    id: int | None = Field(default=None, primary_key=True)
+    name: str
+    temperature_min: float
+    temperature_max: float
+    ph_min: float
+    ph_max: float
+    do_min: float
+    do_max: float
+    turbidity_min : float
+    turbidity_max : float
+
+class Device(SQLModel, table=True):
+    __tablename__ = "devices"
+
+    id: str | None = Field(default=None, primary_key=True)
+    farm_id: int | None = Field(default=None, foreign_key="farms.id")
 
 
 class TelemetryData(SQLModel, table=True):

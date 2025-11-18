@@ -5,6 +5,7 @@ import os
 from .db import get_session_local
 from .models import TelemetryData
 from dotenv import load_dotenv
+from .repositories import telemetry_data_repository
 
 load_dotenv('../.env')
 
@@ -26,7 +27,7 @@ def on_connect(client, userdata, flags, rc):
     try:
         client.subscribe(TOPIC)
         print(f"Subscribed to topic: {TOPIC}")
-    except:
+    except Exception as e:
         print(f"Error: {e}")
 
 
@@ -39,8 +40,7 @@ def on_message(client, userdata, msg):
         telemetry_entry = TelemetryData.from_json(data)
 
         with get_session_local() as session:
-            session.add(telemetry_entry)
-            session.commit()
+            telemetry_data_repository.add(session, telemetry_entry)
 
     except Exception as e:
         print(f"Error: {e}")
