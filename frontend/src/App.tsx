@@ -6,16 +6,30 @@ import DissolvedOxygen from './pages/DissolvedOxygen.tsx';
 import TurbidityPage from './pages/Turbidity.tsx';
 import {FiHome, FiThermometer, FiEye, FiSettings} from 'react-icons/fi';
 import {BiTestTube, BiWater} from "react-icons/bi";
+import { HiOutlineViewGrid } from "react-icons/hi";
 import {farmService, telemetryService} from './api/client';
 import type {TelemetryData} from "./types/Telemetry.ts";
 import type {Farm} from "./types/Farm.ts";
 import SettingsPage from "./pages/Settings.tsx";
+import ViewTypeSelector from './components/ViewTypeSelector.tsx';
+import type { ViewType } from './types/ViewType';
+import type {Device} from "./types/Device.ts";
 
 function App() {
     const [activeTab, setActiveTab] = useState('Overview');
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [latestTelemetry, setLatestTelemetry] = useState<TelemetryData | null>(null);
     const [farm, setFarm] = useState<Farm | null>(null);
+    const [viewType, setViewType] = useState<ViewType>({ view: 'average' });
+    const [selectedDeviceId, setSelectedDeviceId] = useState<string>('greenscale-edge');
+    const [showViewTypeSelector, setShowViewTypeSelector] = useState(true);
+    const [devices, setDevices] = useState<Device[]>([{ id: 'no devices found'}]);
+    const handleViewChange = (view: ViewType, deviceId?: string) => {
+        setViewType(view);
+        if (deviceId) {
+            setSelectedDeviceId(deviceId);
+        }
+    };
 
     useEffect(() => {
         const fetchFarmData = async () => {
@@ -27,6 +41,14 @@ function App() {
             }
         };
 
+        const fetchDevices = async () => {
+            try {
+                const devicesData = await farmService.getDevices(1);
+                setDevices(devicesData);
+            } catch (error) {
+                console.error('Failed to fetch devices:', error);
+            }
+        };
         const fetchTelemetryData = async () => {
             try {
                 const telemetryData = await telemetryService.getLatestByDeviceId('greenscale-edge');
@@ -38,6 +60,7 @@ function App() {
 
         fetchFarmData().catch(error => console.error('Failed to fetch farm data:', error));
         fetchTelemetryData().catch(error => console.error('Failed to fetch telemetry data:', error));
+        fetchDevices().catch(error => console.error('Failed to fetch devices:', error));
 
         const interval = setInterval(() => {
             fetchTelemetryData().catch(error => console.error('Failed to fetch telemetry data:', error));
@@ -84,9 +107,12 @@ function App() {
         if (!latestTelemetry || !farm) {
             return <div className="flex items-center justify-center h-full">Loading...</div>;
         }
+
+        const viewProps = { viewType };
+
         switch (activeTab) {
             case 'Overview':
-                return <OverviewPage farm={farm} latestTelemetry={latestTelemetry} onEditRanges={() => setActiveTab('Settings')} />;
+                return <OverviewPage farm={farm} latestTelemetry={latestTelemetry} onEditRanges={() => setActiveTab('Settings')} {...viewProps} />;
             case 'Temperature':
                 return <TemperaturePage currentValue={latestTelemetry.temperature_c} farm={farm}/>;
             case 'pH Level':
@@ -126,13 +152,28 @@ function App() {
                         ))}
                     </nav>
                     <div className="mt-auto px-2 sapce-y-3 mb-3">
+                        <button className={`flex items-center gap-3 px-2 py-3 rounded-lg cursor-pointer transition-colors w-full ${sidebarOpen ? '' : 'justify-center'} ${showViewTypeSelector ? 'bg-slate-600 text-white' : 'text-white hover:bg-slate-700'}`} onClick={() => setShowViewTypeSelector(!showViewTypeSelector)}>
+                            <HiOutlineViewGrid size={32}/>
+                            {sidebarOpen && <span>View Selector</span>}
+                        </button>
+                    </div>
+                    <div className="mt-auto px-2 sapce-y-3 mb-3">
                         <button className={`flex items-center gap-3 px-2 py-3 rounded-lg cursor-pointer transition-colors w-full ${sidebarOpen ? '' : 'justify-center'} ${activeTab === "Settings" ? 'bg-emerald-500 text-white' : 'text-white hover:bg-slate-700'}`} onClick={() => setActiveTab('Settings')}>
                             <FiSettings size={32}/>
                             {sidebarOpen && <span>Settings</span>}
                         </button>
                     </div>
                 </div>
-                <div className="flex-1 h-screen overflow-auto" style={{ marginLeft: sidebarOpen ? '16rem' : '4.5rem' }}>
+                <div className="flex-1 h-screen overflow-auto relative" style={{ marginLeft: sidebarOpen ? '16rem' : '4.5rem' }}>
+                    {showViewTypeSelector && (
+                        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50" style={{ marginLeft: sidebarOpen ? '8rem' : '2.25rem' }}>
+                            <ViewTypeSelector
+                                viewType={viewType}
+                                devices={devices}
+                                onViewChange={handleViewChange}
+                            />
+                        </div>
+                    )}
                     {renderPage()}
                 </div>
             </div>
