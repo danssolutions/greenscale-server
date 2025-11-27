@@ -1,60 +1,88 @@
 import React from 'react';
-import MetricCard from '../components/MetricCard';
-import type { Farm } from '../types/Farm';
-import {Line, LineChart, ReferenceArea, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceArea } from 'recharts';
+import MetricCard from "../components/MetricCard.tsx";
+import type { Farm } from "../types/Farm.ts";
+import type { TelemetryData } from "../types/Telemetry.ts";
 
-interface TurbidityPage {
-    currentValue: number;
+interface TurbidityPageProps {
     farm: Farm;
+    historicalData: TelemetryData[];
+    latestTelemetry: TelemetryData[];
 }
 
-
-const TurbidityPage: React.FC<TurbidityPage> = ({ currentValue, farm }) => {
-    const data = [
-        { time: '6:00',turbidity: 1 },
-        { time: '7:00',turbidity: 2 },
-        { time: '8:00',turbidity: 3 },
-        { time: '9:00', turbidity: 1 },
-        { time: '10:00',turbidity: 2 },
-        { time: '11:00', turbidity: 2 },
-        { time: '12:00', turbidity: 2 },
-    ];
+const TurbidityPage: React.FC<TurbidityPageProps> = ({ farm, historicalData, latestTelemetry }) => {
+    // Group historical data by device
+    const deviceGroups = historicalData.reduce((acc, item) => {
+        if (!acc[item.device_id]) {
+            acc[item.device_id] = [];
+        }
+        acc[item.device_id].push(item);
+        return acc;
+    }, {} as Record<string, TelemetryData[]>);
 
     return (
-        <div className="p-6 max-w-4xl mx-auto">
-            <h1 className="text-2xl font-bold text-center mb-8">Turbidity</h1>
-            <div className="relative h-96 mb-8">
-                <ResponsiveContainer>
-                    <LineChart data={data}>
-                        <XAxis dataKey="time" />
-                        <YAxis
-                            orientation="right"
-                            domain={[0, 10]}
-                        />
-                        <Tooltip formatter={(value) => `${value}`} />
-                        <ReferenceArea
-                            y1={farm.turbidity_min}
-                            y2={farm.turbidity_max}
-                            fill="#86efac"
-                            fillOpacity={0.5}
-                        />
-                        <Line
-                            type="monotone"
-                            dataKey="turbidity"
-                            stroke="#ef4444"
-                            strokeWidth={4}
-                            dot={false}
-                            animationDuration={800}
-                        />
-                    </LineChart>
-                </ResponsiveContainer>
-            </div>
-            <MetricCard
-                title="Turbidity"
-                value={currentValue}
-                optimalRangeFrom={farm.turbidity_min}
-                optimalRangeTo={farm.turbidity_max}
-            />
+        <div className="flex flex-wrap gap-10 p-8 justify-center">
+            {latestTelemetry.length === 0 ? (
+                <h1 className="text-2xl font-bold text-center mb-5">No telemetry data available</h1>
+            ) : (
+                latestTelemetry.map((telemetry) => {
+                    const chartData = (deviceGroups[telemetry.device_id] || []).map(item => ({
+                        time: new Date(item.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+                        turbidity: item.turbidity_sensor_v
+                    }));
+
+                    const hasHistoricalData = chartData.length > 0;
+
+                    return (
+                        <div key={telemetry.device_id} className="w-3xl p-4 rounded-xl">
+                            <h1 className="text-2xl font-bold text-center">{telemetry.device_id}</h1>
+                            <span className="block text-right text-sm text-gray-600">
+                                {new Date(telemetry.timestamp).toLocaleString('da-DK', { dateStyle: 'short', timeStyle: 'short' })}
+                            </span>
+
+                            <div className="relative h-96 mb-8 bg-white p-4 rounded-xl border-2 border-gray-300">
+                                {hasHistoricalData ? (
+                                    <ResponsiveContainer>
+                                        <LineChart data={chartData}>
+                                            <XAxis dataKey="time" />
+                                            <YAxis
+                                                orientation="right"
+                                                domain={[0, 10]}
+                                            />
+                                            <Tooltip />
+                                            <ReferenceArea
+                                                y1={farm.turbidity_min}
+                                                y2={farm.turbidity_max}
+                                                fill="#86efac"
+                                                fillOpacity={0.5}
+                                            />
+                                            <Line
+                                                type="monotone"
+                                                dataKey="turbidity"
+                                                stroke="#ef4444"
+                                                strokeWidth={4}
+                                                dot={false}
+                                                animationDuration={800}
+                                            />
+                                        </LineChart>
+                                    </ResponsiveContainer>
+                                ) : (
+                                    <div className="flex items-center justify-center h-full text-gray-500">
+                                        No data available for the last 24 hours
+                                    </div>
+                                )}
+                            </div>
+
+                            <MetricCard
+                                title="Turbidity"
+                                value={telemetry.turbidity_sensor_v}
+                                optimalRangeFrom={farm.turbidity_min}
+                                optimalRangeTo={farm.turbidity_max}
+                            />
+                        </div>
+                    );
+                })
+            )}
         </div>
     );
 };

@@ -1,60 +1,91 @@
 import React from 'react';
-import MetricCard from '../components/MetricCard';
-import type { Farm } from '../types/Farm';
-import {AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceArea} from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceArea } from 'recharts';
+import MetricCard from "../components/MetricCard.tsx";
+import type { Farm } from "../types/Farm.ts";
+import type { TelemetryData } from "../types/Telemetry.ts";
 
-interface DissolvedOxygenPage {
-    currentValue: number;
+interface DissolvedOxygenPageProps {
     farm: Farm;
+    historicalData: TelemetryData[];
+    latestTelemetry: TelemetryData[];
 }
 
-const data = [
-    { time: '15:00', DO: 7 },
-    { time: '15:02', DO: 8 },
-    { time: '15:04', DO: 9 },
-    { time: '15:06', DO: 9 },
-    { time: '15:07', DO: 7 },
-];
+const DissolvedOxygenPage: React.FC<DissolvedOxygenPageProps> = ({ farm, historicalData, latestTelemetry }) => {
+    // Group historical data by device
+    const deviceGroups = historicalData.reduce((acc, item) => {
+        if (!acc[item.device_id]) {
+            acc[item.device_id] = [];
+        }
+        acc[item.device_id].push(item);
+        return acc;
+    }, {} as Record<string, TelemetryData[]>);
 
-const DissolvedOxygenPage: React.FC<DissolvedOxygenPage> = ({ currentValue, farm }) => {
     return (
-        <div className="p-6 max-w-4xl mx-auto">
-            <h1 className="text-2xl font-bold text-center mb-8">Dissolved Oxygen</h1>
-            <div className="relative h-96 mb-8">
-                <ResponsiveContainer>
-                    <AreaChart data={data}>
-                        <XAxis dataKey="time" />
-                        <YAxis domain={[0, 20]} />
-                        <YAxis
-                            orientation="right"
-                            domain={[0, 20]}
-                        />
-                        <Tooltip formatter={(value) => `${value} mg/L`}/>
-                        <ReferenceArea
-                            y1={farm.do_min}
-                            y2={farm.do_max}
-                            fill="#86efac"
-                            fillOpacity={0.5}
-                        />
-                        <Area
-                            type="monotone"
-                            dataKey="DO"
-                            stroke="#3bb3bd"
-                            strokeWidth={4}
-                            fill="#b2e6e9"
-                            fillOpacity={0.5}
-                            animationDuration={800}
-                        />
-                    </AreaChart>
-                </ResponsiveContainer>
-            </div>
-            <MetricCard
-                title="Dissolved Oxygen"
-                value={currentValue}
-                unit="mg/L"
-                optimalRangeFrom={farm.do_min}
-                optimalRangeTo={farm.do_max}
-            />
+        <div className="flex flex-wrap gap-10 p-8 justify-center">
+            {latestTelemetry.length === 0 ? (
+                <h1 className="text-2xl font-bold text-center mb-5">No telemetry data available</h1>
+            ) : (
+                latestTelemetry.map((telemetry) => {
+                    const chartData = (deviceGroups[telemetry.device_id] || []).map(item => ({
+                        time: new Date(item.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+                        DO: item.do_mg_per_l
+                    }));
+
+                    const hasHistoricalData = chartData.length > 0;
+
+                    return (
+                        <div key={telemetry.device_id} className="w-3xl p-4 rounded-xl">
+                            <h1 className="text-2xl font-bold text-center">{telemetry.device_id}</h1>
+                            <span className="block text-right text-sm text-gray-600">
+                                {new Date(telemetry.timestamp).toLocaleString('da-DK', { dateStyle: 'short', timeStyle: 'short' })}
+                            </span>
+
+                            <div className="relative h-96 mb-8 bg-white p-4 rounded-xl border-2 border-gray-300">
+                                {hasHistoricalData ? (
+                                    <ResponsiveContainer>
+                                        <AreaChart data={chartData}>
+                                            <XAxis dataKey="time" />
+                                            <YAxis
+                                                orientation="right"
+                                                domain={[0, 20]}
+                                                tickFormatter={(value) => `${value} mg/L`}
+                                            />
+                                            <Tooltip formatter={(value) => `${value} mg/L`} />
+                                            <ReferenceArea
+                                                y1={farm.do_min}
+                                                y2={farm.do_max}
+                                                fill="#86efac"
+                                                fillOpacity={0.5}
+                                            />
+                                            <Area
+                                                type="monotone"
+                                                dataKey="DO"
+                                                stroke="#3bb3bd"
+                                                strokeWidth={4}
+                                                fill="#b2e6e9"
+                                                fillOpacity={0.5}
+                                                animationDuration={800}
+                                            />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
+                                ) : (
+                                    <div className="flex items-center justify-center h-full text-gray-500">
+                                        No data available for the last 24 hours
+                                    </div>
+                                )}
+                            </div>
+
+                            <MetricCard
+                                title="Dissolved Oxygen"
+                                value={telemetry.do_mg_per_l}
+                                unit="mg/L"
+                                optimalRangeFrom={farm.do_min}
+                                optimalRangeTo={farm.do_max}
+                            />
+                        </div>
+                    );
+                })
+            )}
         </div>
     );
 };

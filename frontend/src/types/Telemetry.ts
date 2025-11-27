@@ -10,4 +10,5 @@ export interface TelemetryData {
     do_mg_per_l: number;
     turbidity_sensor_v: number;
     turbidity_index: number;
+    avg_color_hex: string;
 }

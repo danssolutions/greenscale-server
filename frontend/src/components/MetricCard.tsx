@@ -16,10 +16,10 @@ function isInIdealRange(value: number, from: number, to: number): boolean {
 const MetricCard: React.FC<MetricCardProps> = ({ title, value, unitSymbol, unit, optimalRangeFrom, optimalRangeTo }) => {
     const status = isInIdealRange(value, optimalRangeFrom, optimalRangeTo);
     return (
-        <div className={`border-2 rounded-xl p-6 mb-5 bg-white ${
+        <div className={`border-2 rounded-xl p-5 mb-5 bg-white ${
             status ? 'border-emerald-400' : 'border-red-500'
         }`}>
-            <h3 className="text-base text-gray-700 mb-3 font-medium">
+            <h3 className="text-base text-gray-700 mb-2 font-medium">
                 {title}
             </h3>
             <div className="flex justify-between items-center">
