@@ -1,4 +1,4 @@
-# Setup and run:
+# Setup and run the backend:
 
 1. Make a copy of the `.env.example` file and rename it to `.env`
 
@@ -15,6 +15,14 @@
 
 1. Install the requirements: ```pip install -r requirements.txt```
 
-1. Run the api with ```fastapi run main.py```
+1. Start the api with ```fastapi run main.py```
 
 After stopping the api, stop the containers with: ```docker compose down```
+
+# Run the frontend:
+
+1. Go to the `frontend` directory
+
+2. Run ```npm i```
+
+3. Start the frontend with: ```npm run dev```
