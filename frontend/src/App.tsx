@@ -164,12 +164,16 @@ function App() {
     ];
 
     const renderPage = () => {
-        if (!latestTelemetryDataDevices.length || !farm) {
+        if (!farm) {
             return <div className="flex items-center justify-center h-full">Loading...</div>;
         }
 
+        if(!devices.length && activeTab !== 'Settings') {
+            return <div className="flex items-center justify-center h-full">No devices found, go to the settings page to add one</div>;
+        }
+
         const currentData = selectedLatestTelemetryDataDevices[0];
-        if (!currentData && activeTab !== 'Overview' && activeTab !== 'Settings') {
+        if (!currentData && activeTab !== 'Settings') {
             return <div className="flex items-center justify-center h-full">No data available</div>;
         }
 
@@ -185,7 +189,12 @@ function App() {
             case 'Turbidity':
                 return <TurbidityPage farm={farm} historicalData={historicalTelemetryData} latestTelemetry={selectedLatestTelemetryDataDevices}/>;
             case 'Settings':
-                return <SettingsPage farm={farm} onSave={(updatedFarm) => setFarm(updatedFarm)} />;
+                return <SettingsPage
+                    farm={farm}
+                    devices={devices}
+                    onSave={(updatedFarm) => setFarm(updatedFarm)}
+                    onDevicesChange={(updatedDevices) => setDevices(updatedDevices)}
+                />;
             default:
                 return <OverviewPage farm={farm} latestTelemetry={latestTelemetryDataDevices}/>;
         }

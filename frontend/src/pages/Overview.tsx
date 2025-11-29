@@ -12,7 +12,7 @@ const OverviewPage: React.FC<OverviewPageProps> = ({ farm, latestTelemetry }) =>
     return (
         <div className="flex flex-wrap gap-10 p-8 justify-center">
             {latestTelemetry.length === 0 ? (
-                <h1 className="text-2xl font-bold text-center mb-5">No telemetry data available</h1>
+                <div className="flex items-center justify-center h-full">No data available</div>
             ) : (
                 latestTelemetry.map((telemetry, idx) => (
                     <div key={telemetry.device_id ?? idx} className="w-3xl p-4 rounded-xl ">

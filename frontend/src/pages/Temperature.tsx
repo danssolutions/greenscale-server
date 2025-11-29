@@ -23,7 +23,7 @@ const TemperaturePage: React.FC<TemperaturePageProps> = ({ farm, historicalData,
     return (
         <div className="flex flex-wrap gap-10 p-8 justify-center">
             {latestTelemetry.length === 0 ? (
-                <h1 className="text-2xl font-bold text-center mb-5">No telemetry data available</h1>
+                <div className="flex items-center justify-center h-full">No data available</div>
             ) : (
                 latestTelemetry.map((telemetry) => {
                     const chartData = (deviceGroups[telemetry.device_id] || []).map(item => ({
