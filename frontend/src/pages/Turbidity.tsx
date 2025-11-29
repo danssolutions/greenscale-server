@@ -11,7 +11,9 @@ interface TurbidityPageProps {
 }
 
 const TurbidityPage: React.FC<TurbidityPageProps> = ({ farm, historicalData, latestTelemetry }) => {
-    // Group historical data by device
+    const domainMin = Math.floor(farm.turbidity_min - farm.turbidity_max / 2);
+    const domainMax = Math.ceil(farm.turbidity_max / 2) * 3;
+
     const deviceGroups = historicalData.reduce((acc, item) => {
         if (!acc[item.device_id]) {
             acc[item.device_id] = [];
@@ -27,7 +29,7 @@ const TurbidityPage: React.FC<TurbidityPageProps> = ({ farm, historicalData, lat
             ) : (
                 latestTelemetry.map((telemetry) => {
                     const chartData = (deviceGroups[telemetry.device_id] || []).map(item => ({
-                        time: new Date(item.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+                        time: new Date(item.timestamp).toLocaleTimeString('da-DK', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
                         turbidity: item.turbidity_sensor_v
                     }));
 
@@ -47,9 +49,11 @@ const TurbidityPage: React.FC<TurbidityPageProps> = ({ farm, historicalData, lat
                                             <XAxis dataKey="time" />
                                             <YAxis
                                                 orientation="right"
-                                                domain={[0, 10]}
+                                                domain={[domainMin, domainMax]}
                                             />
-                                            <Tooltip />
+                                            <Tooltip
+                                                labelFormatter={(label) => `time: ${label}`}
+                                            />
                                             <ReferenceArea
                                                 y1={farm.turbidity_min}
                                                 y2={farm.turbidity_max}

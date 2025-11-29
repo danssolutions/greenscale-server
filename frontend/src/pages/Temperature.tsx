@@ -11,6 +11,8 @@ interface TemperaturePageProps {
 }
 
 const TemperaturePage: React.FC<TemperaturePageProps> = ({ farm, historicalData, latestTelemetry }) => {
+    const domainMin = Math.floor(farm.temperature_min - farm.temperature_max / 2);
+    const domainMax = Math.ceil(farm.temperature_max / 2) * 3;
     // Group historical data by device
     const deviceGroups = historicalData.reduce((acc, item) => {
         if (!acc[item.device_id]) {
@@ -27,7 +29,7 @@ const TemperaturePage: React.FC<TemperaturePageProps> = ({ farm, historicalData,
             ) : (
                 latestTelemetry.map((telemetry) => {
                     const chartData = (deviceGroups[telemetry.device_id] || []).map(item => ({
-                        time: new Date(item.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+                        time: new Date(item.timestamp).toLocaleTimeString('da-DK', { hour: '2-digit', minute: '2-digit' , second: '2-digit' }),
                         temperature: item.temperature_c
                     }));
 
@@ -47,10 +49,13 @@ const TemperaturePage: React.FC<TemperaturePageProps> = ({ farm, historicalData,
                                             <XAxis dataKey="time" />
                                             <YAxis
                                                 orientation="right"
-                                                domain={[10, 30]}
+                                                domain={[domainMin, domainMax]}
                                                 tickFormatter={(value) => `${value}°`}
                                             />
-                                            <Tooltip formatter={(value) => `${value}°`} />
+                                            <Tooltip
+                                                formatter={(value) => `${value}°`}
+                                                labelFormatter={(label) => `time: ${label}`}
+                                            />
                                             <ReferenceArea
                                                 y1={farm.temperature_min}
                                                 y2={farm.temperature_max}

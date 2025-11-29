@@ -11,7 +11,9 @@ interface PhLevelPageProps {
 }
 
 const PhLevelPage: React.FC<PhLevelPageProps> = ({ farm, historicalData, latestTelemetry }) => {
-    // Group historical data by device
+    const domainMin = Math.floor(farm.ph_min - farm.ph_max / 2);
+    const domainMax = Math.ceil(farm.ph_max / 2) * 3;
+
     const deviceGroups = historicalData.reduce((acc, item) => {
         if (!acc[item.device_id]) {
             acc[item.device_id] = [];
@@ -27,7 +29,7 @@ const PhLevelPage: React.FC<PhLevelPageProps> = ({ farm, historicalData, latestT
             ) : (
                 latestTelemetry.map((telemetry) => {
                     const chartData = (deviceGroups[telemetry.device_id] || []).map(item => ({
-                        time: new Date(item.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+                        time: new Date(item.timestamp).toLocaleTimeString('da-DK', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
                         pH: item.ph
                     }));
 
@@ -47,9 +49,11 @@ const PhLevelPage: React.FC<PhLevelPageProps> = ({ farm, historicalData, latestT
                                             <XAxis dataKey="time" />
                                             <YAxis
                                                 orientation="right"
-                                                domain={[0, 14]}
+                                                domain={[domainMin, domainMax]}
                                             />
-                                            <Tooltip />
+                                            <Tooltip
+                                                labelFormatter={(label) => `time: ${label}`}
+                                            />
                                             <ReferenceArea
                                                 y1={farm.ph_min}
                                                 y2={farm.ph_max}

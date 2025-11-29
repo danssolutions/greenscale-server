@@ -11,7 +11,9 @@ interface DissolvedOxygenPageProps {
 }
 
 const DissolvedOxygenPage: React.FC<DissolvedOxygenPageProps> = ({ farm, historicalData, latestTelemetry }) => {
-    // Group historical data by device
+    const domainMin = Math.floor(farm.do_min - farm.do_max / 2);
+    const domainMax = Math.ceil(farm.do_max / 2) * 3;
+
     const deviceGroups = historicalData.reduce((acc, item) => {
         if (!acc[item.device_id]) {
             acc[item.device_id] = [];
@@ -27,7 +29,7 @@ const DissolvedOxygenPage: React.FC<DissolvedOxygenPageProps> = ({ farm, histori
             ) : (
                 latestTelemetry.map((telemetry) => {
                     const chartData = (deviceGroups[telemetry.device_id] || []).map(item => ({
-                        time: new Date(item.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+                        time: new Date(item.timestamp).toLocaleTimeString('da-DK', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
                         DO: item.do_mg_per_l
                     }));
 
@@ -47,10 +49,13 @@ const DissolvedOxygenPage: React.FC<DissolvedOxygenPageProps> = ({ farm, histori
                                             <XAxis dataKey="time" />
                                             <YAxis
                                                 orientation="right"
-                                                domain={[0, 20]}
+                                                domain={[domainMin, domainMax]}
                                                 tickFormatter={(value) => `${value} mg/L`}
                                             />
-                                            <Tooltip formatter={(value) => `${value} mg/L`} />
+                                            <Tooltip
+                                                formatter={(value) => `${value} mg/L`}
+                                                labelFormatter={(label) => `time: ${label}`}
+                                            />
                                             <ReferenceArea
                                                 y1={farm.do_min}
                                                 y2={farm.do_max}
