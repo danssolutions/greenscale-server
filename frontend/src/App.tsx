@@ -6,13 +6,15 @@ import DissolvedOxygen from './pages/DissolvedOxygen.tsx';
 import TurbidityPage from './pages/Turbidity.tsx';
 import {FiHome, FiThermometer, FiEye, FiSettings} from 'react-icons/fi';
 import {BiTestTube, BiWater} from "react-icons/bi";
-import { HiOutlineViewGrid } from "react-icons/hi";
+import {HiOutlineViewGrid} from "react-icons/hi";
 import {farmService, telemetryService} from './api/client';
 import type {TelemetryData} from "./types/Telemetry.ts";
 import type {Farm} from "./types/Farm.ts";
 import SettingsPage from "./pages/Settings.tsx";
 import ViewTypeSelector from './components/ViewTypeSelector.tsx';
 import type {Device} from "./types/Device.ts";
+import {HiTableCells} from "react-icons/hi2";
+import TablePage from "./pages/Table.tsx";
 
 function App() {
     const [activeTab, setActiveTab] = useState('Overview');
@@ -160,7 +162,17 @@ function App() {
             label: 'Turbidity',
             icon: <FiEye size={32} />,
             onClick: () => setActiveTab('Turbidity')
-        }
+        },
+        ...(singleDeviceId
+            ? [
+                {
+                    key: 'Table',
+                    label: 'Table View',
+                    icon: <HiTableCells size={32} />,
+                    onClick: () => setActiveTab('Table')
+                }
+            ]
+            : [])
     ];
 
     const renderPage = () => {
@@ -188,6 +200,8 @@ function App() {
                 return <DissolvedOxygen farm={farm} historicalData={historicalTelemetryData} latestTelemetry={selectedLatestTelemetryDataDevices}/>;
             case 'Turbidity':
                 return <TurbidityPage farm={farm} historicalData={historicalTelemetryData} latestTelemetry={selectedLatestTelemetryDataDevices}/>;
+            case 'Table':
+                return <TablePage deviceId={singleDeviceId}/>;
             case 'Settings':
                 return <SettingsPage
                     farm={farm}
