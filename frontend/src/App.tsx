@@ -6,15 +6,14 @@ import DissolvedOxygen from './pages/DissolvedOxygen.tsx';
 import TurbidityPage from './pages/Turbidity.tsx';
 import {FiHome, FiThermometer, FiEye, FiSettings} from 'react-icons/fi';
 import {BiTestTube, BiWater} from "react-icons/bi";
-import {HiOutlineViewGrid} from "react-icons/hi";
 import {farmService, telemetryService} from './api/client';
 import type {TelemetryData} from "./types/Telemetry.ts";
 import type {Farm} from "./types/Farm.ts";
 import SettingsPage from "./pages/Settings.tsx";
-import ViewTypeSelector from './components/ViewTypeSelector.tsx';
 import type {Device} from "./types/Device.ts";
 import {HiTableCells} from "react-icons/hi2";
 import TablePage from "./pages/Table.tsx";
+import {LuLayoutGrid, LuSquareSquare} from "react-icons/lu";
 
 function App() {
     const [activeTab, setActiveTab] = useState('Overview');
@@ -23,14 +22,9 @@ function App() {
     const [selectedLatestTelemetryDataDevices, setSelectedLatestTelemetryDataDevices] = useState<TelemetryData[]>([]);
     const [farm, setFarm] = useState<Farm | null>(null);
     const [singleDeviceId, setSingleDeviceId] = useState<string | null>(null);
-    const [showViewTypeSelector, setShowViewTypeSelector] = useState(true);
+    const [showDeviceSelector, setShowDeviceSelector] = useState(false);
     const [devices, setDevices] = useState<Device[]>([]);
     const [historicalTelemetryData, setHistoricalTelemetryData] = useState<TelemetryData[]>([]);
-
-
-    const handleViewChange = (deviceId: string | null) => {
-        setSingleDeviceId(deviceId);
-    };
 
     useEffect(() => {
         const fetchFarmData = async () => {
@@ -131,6 +125,11 @@ function App() {
         return () => clearInterval(interval);
     }, [devices]);
 
+    const handleDeviceChange = (deviceId: string | null) => {
+        setSingleDeviceId(deviceId);
+        setShowDeviceSelector(false);
+    };
+
 
     const menuItems = [
         {
@@ -163,16 +162,12 @@ function App() {
             icon: <FiEye size={32} />,
             onClick: () => setActiveTab('Turbidity')
         },
-        ...(singleDeviceId
-            ? [
-                {
-                    key: 'Table',
-                    label: 'Table View',
-                    icon: <HiTableCells size={32} />,
-                    onClick: () => setActiveTab('Table')
-                }
-            ]
-            : [])
+        {
+            key: 'Table',
+            label: 'Table View',
+            icon: <HiTableCells size={32} />,
+            onClick: () => setActiveTab('Table')
+        }
     ];
 
     const renderPage = () => {
@@ -217,8 +212,8 @@ function App() {
     return (
         <StrictMode>
             <div className="h-screen bg-gray-100 flex">
-                <div className={`${sidebarOpen ? 'w-64' : 'w-18'} h-screen overflow-hidden bg-slate-900 border-r flex flex-col fixed`}>
-                    <div className="mt-3 px-2">
+                <div className={`${sidebarOpen ? 'w-64' : 'w-18'} h-screen overflow-hidden bg-slate-900 flex flex-col fixed`}>
+                    <div className="mt-2 px-2">
                         <button
                             onClick={() => setSidebarOpen(!sidebarOpen)}
                             className={`flex items-center gap-3 px-1 py-3 rounded-lg cursor-pointer transition-colors w-full text-white hover:bg-slate-700 justify-center h-14`}>
@@ -226,7 +221,7 @@ function App() {
                             <img src="/icon.png" alt="App Icon" width={48} height={48} className="text-emerald-500" />
                         </button>
                     </div>
-                    <nav className="flex-1 space-y-3 px-2 mt-3">
+                    <nav className="flex-1 space-y-2 px-2 mt-4">
                         {menuItems.map((item) => (
                             <div
                                 key={item.key}
@@ -237,13 +232,22 @@ function App() {
                             </div>
                         ))}
                     </nav>
-                    <div className="mt-auto px-2 mb-3">
-                        <button className={`flex items-center gap-3 px-2 py-3 rounded-lg cursor-pointer transition-colors w-full ${sidebarOpen ? '' : 'justify-center'} ${showViewTypeSelector ? 'bg-slate-600 text-white' : 'text-white hover:bg-slate-700'}`} onClick={() => setShowViewTypeSelector(!showViewTypeSelector)}>
-                            <HiOutlineViewGrid size={32}/>
-                            {sidebarOpen && <span>View Selector</span>}
-                        </button>
+                    <div className={`flex flex-col ${showDeviceSelector ? 'bg-slate-800' : ''}`}>
+                        <div className={`h-4 bg-slate-900 ${showDeviceSelector ? 'rounded-br-2xl' : ''}`}></div>
+                        <div className={`mt-auto pr-2 ml-2 rounded-l-lg ${showDeviceSelector ? 'bg-slate-800' : ''}`}>
+                            <button className={`flex items-center gap-3 ml-0 px-2 py-3 cursor-pointer transition-colors rounded-lg w-full hover:bg-slate-600 ${sidebarOpen ? '' : 'justify-center'}  ${singleDeviceId ? 'bg-slate-700' : ''} ${showDeviceSelector ? 'bg-slate-800 text-white' : 'text-white'}`} onClick={() => setShowDeviceSelector(!showDeviceSelector)}>
+                                <LuSquareSquare size={32}/>
+                                {sidebarOpen && <span>{singleDeviceId ? singleDeviceId : 'Select Device'}</span>}
+                            </button>
+                        </div>
+                        <div className={`mt-auto px-2 py-2 bg-slate-900 ${showDeviceSelector ? 'rounded-tr-2xl' : ''}`}>
+                            <button className={`flex items-center gap-3 px-2 py-3 rounded-lg cursor-pointer transition-colors w-full text-white hover:bg-slate-600 ${sidebarOpen ? '' : 'justify-center'} ${singleDeviceId === null ? 'bg-slate-700' : ''}`} onClick={() => {setSingleDeviceId(null); setShowDeviceSelector(false);}}>
+                                <LuLayoutGrid size={32}/>
+                                {sidebarOpen && <span>All devices</span>}
+                            </button>
+                        </div>
                     </div>
-                    <div className="mt-auto px-2 space-y-3 mb-3">
+                    <div className="mt-auto px-2 space-y-3 mb-2">
                         <button className={`flex items-center gap-3 px-2 py-3 rounded-lg cursor-pointer transition-colors w-full ${sidebarOpen ? '' : 'justify-center'} ${activeTab === "Settings" ? 'bg-emerald-500 text-white' : 'text-white hover:bg-slate-700'}`} onClick={() => setActiveTab('Settings')}>
                             <FiSettings size={32}/>
                             {sidebarOpen && <span>Settings</span>}
@@ -251,14 +255,21 @@ function App() {
                     </div>
                 </div>
                 <div className="flex-1 h-screen overflow-auto relative" style={{ marginLeft: sidebarOpen ? '16rem' : '4.5rem' }}>
-                    {showViewTypeSelector && (
-                        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50" style={{ marginLeft: sidebarOpen ? '8rem' : '2.25rem' }}>
-                            <ViewTypeSelector
-                                singleDeviceId={singleDeviceId}
-                                devices={devices}
-                                onViewChange={handleViewChange}
-                            />
-                        </div>
+                    {showDeviceSelector && (
+                            <div
+                                className="fixed h-screen bg-slate-800 text-white overflow-y-auto px-2 pt-18 w-64 z-69">
+                                {devices.map((device) => (
+                                    <button
+                                        key={device.id}
+                                        onClick={() => handleDeviceChange(device.id)}
+                                        className={`flex w-full items-center text-left p-4 my-2 rounded-lg cursor-pointer hover:bg-slate-600 ${
+                                            singleDeviceId === device.id ? 'bg-emerald-500 font-semibold' : ''
+                                        }`}
+                                    >
+                                        {device.id}
+                                    </button>
+                                ))}
+                            </div>
                     )}
                     {renderPage()}
                 </div>
