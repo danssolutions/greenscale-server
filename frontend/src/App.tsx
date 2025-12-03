@@ -226,7 +226,7 @@ function App() {
                             <div
                                 key={item.key}
                                 onClick={item.onClick}
-                                className={`flex items-center gap-3 px-2 py-3 rounded-lg cursor-pointer transition-colors ${sidebarOpen ? '' : 'justify-center'} ${activeTab === item.key ? 'bg-emerald-500 text-white' : 'text-white hover:bg-slate-700'}`}>
+                                className={`flex items-center gap-3 px-2 py-3 rounded-lg cursor-pointer transition-colors ${sidebarOpen ? 'pl-3' : 'justify-center'} ${activeTab === item.key ? 'bg-emerald-500 text-white' : 'text-white hover:bg-slate-700'}`}>
                                 {item.icon}
                                 {sidebarOpen && <span>{item.label}</span>}
                             </div>
@@ -235,20 +235,20 @@ function App() {
                     <div className={`flex flex-col ${showDeviceSelector ? 'bg-slate-800' : ''}`}>
                         <div className={`h-4 bg-slate-900 ${showDeviceSelector ? 'rounded-br-2xl' : ''}`}></div>
                         <div className={`mt-auto pr-2 ml-2 rounded-l-lg ${showDeviceSelector ? 'bg-slate-800' : ''}`}>
-                            <button className={`flex items-center gap-3 ml-0 px-2 py-3 cursor-pointer transition-colors rounded-lg w-full hover:bg-slate-600 ${sidebarOpen ? '' : 'justify-center'}  ${singleDeviceId ? 'bg-slate-700' : ''} ${showDeviceSelector ? 'bg-slate-800 text-white' : 'text-white'}`} onClick={() => setShowDeviceSelector(!showDeviceSelector)}>
+                            <button className={`flex items-center gap-3 ml-0 px-2 py-3 cursor-pointer transition-colors rounded-lg w-full hover:bg-slate-600 ${sidebarOpen ? 'pl-3' : 'justify-center'}  ${singleDeviceId ? 'bg-slate-700' : ''} ${showDeviceSelector ? 'bg-slate-800 text-white' : 'text-white'}`} onClick={() => setShowDeviceSelector(!showDeviceSelector)}>
                                 <LuSquareSquare size={32}/>
                                 {sidebarOpen && <span>{singleDeviceId ? singleDeviceId : 'Select Device'}</span>}
                             </button>
                         </div>
                         <div className={`mt-auto px-2 py-2 bg-slate-900 ${showDeviceSelector ? 'rounded-tr-2xl' : ''}`}>
-                            <button className={`flex items-center gap-3 px-2 py-3 rounded-lg cursor-pointer transition-colors w-full text-white hover:bg-slate-600 ${sidebarOpen ? '' : 'justify-center'} ${singleDeviceId === null ? 'bg-slate-700' : ''}`} onClick={() => {setSingleDeviceId(null); setShowDeviceSelector(false);}}>
+                            <button className={`flex items-center gap-3 px-2 py-3 rounded-lg cursor-pointer transition-colors w-full text-white hover:bg-slate-600 ${sidebarOpen ? 'pl-3' : 'justify-center'} ${singleDeviceId === null ? 'bg-slate-700' : ''}`} onClick={() => {setSingleDeviceId(null); setShowDeviceSelector(false);}}>
                                 <LuLayoutGrid size={32}/>
                                 {sidebarOpen && <span>All devices</span>}
                             </button>
                         </div>
                     </div>
                     <div className="mt-auto px-2 space-y-3 mb-2">
-                        <button className={`flex items-center gap-3 px-2 py-3 rounded-lg cursor-pointer transition-colors w-full ${sidebarOpen ? '' : 'justify-center'} ${activeTab === "Settings" ? 'bg-emerald-500 text-white' : 'text-white hover:bg-slate-700'}`} onClick={() => setActiveTab('Settings')}>
+                        <button className={`flex items-center gap-3 px-2 py-3 rounded-lg cursor-pointer transition-colors w-full ${sidebarOpen ? 'pl-3' : 'justify-center'} ${activeTab === "Settings" ? 'bg-emerald-500 text-white' : 'text-white hover:bg-slate-700'}`} onClick={() => setActiveTab('Settings')}>
                             <FiSettings size={32}/>
                             {sidebarOpen && <span>Settings</span>}
                         </button>
@@ -262,8 +262,8 @@ function App() {
                                     <button
                                         key={device.id}
                                         onClick={() => handleDeviceChange(device.id)}
-                                        className={`flex w-full items-center text-left p-4 my-2 rounded-lg cursor-pointer hover:bg-slate-600 ${
-                                            singleDeviceId === device.id ? 'bg-emerald-500 font-semibold' : ''
+                                        className={`flex w-full items-center text-left p-4 my-2 rounded-lg cursor-pointer ${
+                                            singleDeviceId === device.id ? 'bg-emerald-500 font-semibold' : 'hover:bg-slate-600'
                                         }`}
                                     >
                                         {device.id}

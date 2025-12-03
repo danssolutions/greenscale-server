@@ -12,7 +12,7 @@ interface SettingsPageProps {
 
 function SettingsPage({ farm, devices, onSave, onDevicesChange }: SettingsPageProps) {
     return (
-        <div className="gap-10 p-12 max-w-4xl mx-auto pb-25">
+        <div className="gap-10 p-12 max-w-4xl mx-auto">
             <h1 className="text-2xl font-bold text-center">Settings</h1>
             <div className="p-6 space-y-6">
                 <OptimalRangeSettingsCard
