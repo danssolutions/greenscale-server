@@ -3,6 +3,7 @@ sqlmodel
 dotenv
 psycopg2-binary
 paho-mqtt
+pytest
 fastapi-users[sqlmodel]==13.0.0
 fastapi-users[jwt]==13.0.0
 fastapi-users-db-sqlmodel

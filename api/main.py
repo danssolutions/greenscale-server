@@ -1,10 +1,19 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes import router
 from app.mqtt_client import start_mqtt_listener
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    start_mqtt_listener()
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -14,11 +23,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.on_event("startup")
-def startup_event():
-    start_mqtt_listener()
-
 app.include_router(router)
+
 
 @app.get("/")
 def root():
