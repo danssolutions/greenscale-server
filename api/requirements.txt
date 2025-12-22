@@ -3,3 +3,4 @@ sqlmodel
 dotenv
 psycopg2-binary
 paho-mqtt
+pytest
