@@ -23,9 +23,11 @@ CREATE TABLE IF NOT EXISTS users (
     type_id INT REFERENCES user_types(id),
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash VARCHAR(255),
+    hashed_password VARCHAR(255) NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    is_superuser BOOLEAN NOT NULL DEFAULT FALSE,
+    is_verified BOOLEAN NOT NULL DEFAULT FALSE,
     farm_id INT REFERENCES farms(id)
-
 );
 
 CREATE TABLE IF NOT EXISTS devices (
@@ -60,7 +62,3 @@ VALUES ('Farm1', 19, 25, 6, 8, 8, 9, 2, 5);
 INSERT INTO devices (id, farm_id)
 VALUES ('greenscale-edge', (SELECT id FROM farms WHERE name = 'Farm1'))
 ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO users (type_id, name, email, farm_id)
-VALUES ((SELECT id FROM user_types WHERE name = 'user'), 'user', 'user@user.com', (SELECT id FROM farms WHERE name = 'Farm1'))
-ON CONFLICT (email) DO NOTHING;

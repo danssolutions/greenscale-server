@@ -1,22 +1,50 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session
 from .db import get_session
-from .repositories import telemetry_data_repository, farm_repository, device_repository, user_repository
+from .repositories import telemetry_data_repository, farm_repository, device_repository
 from .models import *
+from .auth import auth_backend, fastapi_users, current_active_user
+from .schemas import UserRead, UserCreate, UserUpdate
 
 router = APIRouter(prefix="/api")
+
+# Auth routes
+router.include_router(
+    fastapi_users.get_auth_router(auth_backend),
+    prefix="/auth/jwt",
+    tags=["auth"]
+)
+
+router.include_router(
+    fastapi_users.get_register_router(UserRead, UserCreate),
+    prefix="/auth",
+    tags=["auth"]
+)
+
+router.include_router(
+    fastapi_users.get_users_router(UserRead, UserUpdate),
+    prefix="/users",
+    tags=["users"]
+)
 
 
 ### TelemetryData
 @router.get("/telemetry-data/all", response_model=list[TelemetryData])
-def get_all_telemetry_data(db: Session = Depends(get_session)):
+def get_all_telemetry_data(
+    db: Session = Depends(get_session),
+    user: User = Depends(current_active_user)
+):
     data = telemetry_data_repository.get_all(db)
     if data == None:
         raise HTTPException(404)
     return data
 
 @router.get("/telemetry-data/{device_id}/latest", response_model=TelemetryData)
-def get_latest_telemetry_data(device_id: str, db: Session = Depends(get_session)):
+def get_latest_telemetry_data(
+    device_id: str,
+    db: Session = Depends(get_session),
+    user: User = Depends(current_active_user)
+):
     data = telemetry_data_repository.get_latest_by_device_id(db, device_id)
     if data is None:
         raise HTTPException(404)

@@ -1,5 +1,6 @@
 from sqlmodel import Field, Relationship, SQLModel
 from datetime import datetime
+from fastapi_users_db_sqlmodel import SQLModelBaseUserDB
 
 
 class UserType(SQLModel, table=True):
@@ -11,17 +12,16 @@ class UserType(SQLModel, table=True):
     users: list["User"] = Relationship(back_populates="user_type")
 
 
-class User(SQLModel, table=True):
+class User(SQLModelBaseUserDB, table=True):
     __tablename__ = "users"
 
     id: int | None = Field(default=None, primary_key=True)
     type_id: int | None = Field(default=None, foreign_key="user_types.id")
     name: str
-    email: str
-    password_hash: str
     farm_id: int | None = Field(default=None, foreign_key="farms.id")
 
     user_type: UserType | None = Relationship(back_populates="users")
+
 
 class UserInfo(SQLModel):
     id: int
