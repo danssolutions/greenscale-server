@@ -51,7 +51,8 @@ const OverviewPage: React.FC<OverviewPageProps> = ({ farm, latestTelemetry }) =>
                                 </h3>
                                 <div className="flex">
                                     <div className="flex-1 text-5xl font-bold rounded-xl p-1 text-emerald-400">
-                                        {telemetry.turbidity_index}
+                                        {(telemetry.turbidity_index * 100).toFixed(2)}
+                                        <span className="text-3xl">%</span>
                                     </div>
                                     <div
                                         className="flex-1 flex items-center rounded-full p-1 text-white pl-6"
